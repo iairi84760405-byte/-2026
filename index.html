@@ -2,135 +2,205 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogChat - 業務連絡</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LogChat | 業務効率化チャット</title>
     <style>
-        :root { --main-blue: #0078d4; --bg-gray: #f3f2f1; }
-        body, html { margin: 0; padding: 0; font-family: sans-serif; background: var(--bg-gray); overflow: hidden; height: 100%; }
-        
-        /* チャットUI */
-        #chat-app { display: flex; flex-direction: column; height: 100vh; transition: background 3s; }
-        header { background: var(--main-blue); color: white; padding: 15px; font-weight: bold; transition: background 2s; }
-        #message-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { background: white; padding: 10px; border-radius: 8px; max-width: 80%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; animation: fadeIn 0.3s; }
-        .msg.bot { align-self: flex-start; }
-        .user-name { font-size: 0.7em; color: #666; margin-bottom: 4px; }
-        
-        /* 侵食エフェクト */
-        .white-finger-bg { background-image: url('https://www.transparenttextures.com/patterns/crackle.png') !important; }
-        .glitch { animation: glitch 0.1s infinite; }
-        @keyframes glitch { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(0); } }
+        :root { --log-blue: #0056b3; --log-gray: #f8f9fa; --horror-red: #8b0000; }
+        body, html { margin: 0; padding: 0; font-family: "Helvetica Neue", Arial, sans-serif; background: #fff; height: 100%; overflow: hidden; }
 
-        /* 赤い部屋のダイアログ */
-        #horror-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(139, 0, 0, 0.9); z-index: 1000; color: white; 
-            justify-content: center; align-items: center; flex-direction: column; text-align: center;
-        }
-        #modal { background: white; color: black; padding: 30px; border-radius: 10px; border: 4px solid #8b0000; max-width: 80%; }
-        #modal button { margin-top: 20px; padding: 10px 20px; background: #8b0000; color: white; border: none; cursor: pointer; }
+        /* ロゴチャット UI 再現 */
+        #app { display: flex; flex-direction: column; height: 100vh; position: relative; z-index: 10; transition: all 1s; }
+        header { background: var(--log-blue); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #chat-area { flex: 1; background: var(--log-gray); padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 10px; border-radius: 8px; font-size: 14px; position: relative; animation: fadeIn 0.3s; }
+        .received { background: white; align-self: flex-start; border: 1px solid #ddd; }
+        .user-name { font-weight: bold; font-size: 11px; color: #555; margin-bottom: 3px; }
 
-        /* 最終画面 */
-        #final-screen { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: black; z-index: 2000; flex-direction: column; justify-content: center; align-items: center;
+        /* 偽広告バナー */
+        #ad-banner { 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; 
+            background: #fff; border-top: 2px solid #ccc; display: flex; align-items: center; 
+            padding: 5px; box-sizing: border-box; cursor: pointer; z-index: 100;
         }
+        .ad-img { width: 50px; height: 50px; background: #eee; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1px solid #ccc; }
+        .ad-text { font-size: 12px; color: #333; }
+
+        /* 偽通知バー */
+        #notice-bar {
+            position: fixed; top: -100px; left: 10px; right: 10px; height: 70px;
+            background: rgba(255,255,255,0.95); border-radius: 12px; border-left: 5px solid var(--log-blue);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000; padding: 10px;
+            display: flex; flex-direction: column; justify-content: center; transition: top 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        /* 侵食テクスチャ */
+        .finger-texture { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; opacity: 0; transition: opacity 2s; background-image: url('https://www.transparenttextures.com/patterns/crackle.png'); filter: invert(1); }
+        .skin-layer { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 60; background: radial-gradient(circle, transparent, var(--horror-red)); mix-blend-mode: multiply; opacity: 0; }
+
+        /* ダイアログ */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal { background: white; width: 80%; max-width: 300px; border-radius: 12px; text-align: center; overflow: hidden; }
+        .modal-body { padding: 20px; font-size: 14px; }
+        .modal-footer { display: flex; border-top: 1px solid #eee; }
+        .modal-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; cursor: pointer; }
+        .btn-blue { color: var(--log-blue); }
+
+        /* 白い指（中央） */
+        #center-finger { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 1500; font-size: 150px; transition: transform 0.5s; cursor: pointer; filter: drop-shadow(0 0 10px #fff); }
+
+        /* フィニッシュ画面 */
+        #final { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 3000; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translate(-50%, -50%) rotate(0); } 25% { transform: translate(-52%, -50%) rotate(-2deg); } 75% { transform: translate(-48%, -50%) rotate(2deg); } }
+        .shaking { animation: shake 0.1s infinite; }
     </style>
 </head>
 <body>
 
-<div id="chat-app">
-    <header id="header">LogChat [プロジェクト・α]</header>
-    <div id="message-area">
-        <div class="msg bot">
+<div id="app">
+    <header id="log-header">
+        <span>LogChat</span>
+        <span style="font-size: 12px;">👤 営業部 2課</span>
+    </header>
+    <div id="chat-area">
+        <div class="msg received">
+            <div class="user-name">システム</div>
+            <div>[お知らせ] セキュリティアップデートが完了しました。</div>
+        </div>
+        <div class="msg received">
             <div class="user-name">田中 太郎</div>
-            <div>本日の進捗、共有します。</div>
+            <div>お疲れ様です。明日のミーティングの件ですが、資料をアップロードしました。</div>
         </div>
-        <div class="msg bot" id="trigger-msg" style="cursor: pointer; border: 2px solid var(--main-blue);">
-            <div class="user-name">不明なユーザー</div>
-            <div style="color: var(--main-blue);">[画像] 指の件、確認お願いします。</div>
+    </div>
+
+    <div id="ad-banner" onclick="startSequence()">
+        <div class="ad-img"><div style="background:white;width:30px;height:40px;border-radius:20px 20px 5px 5px;box-shadow:inset 0 0 5px #ccc;"></div></div>
+        <div class="ad-text"><b>見覚えのないものがあなたのスマホに…？</b><br><small>詳細を確認して削除する</small></div>
+    </div>
+</div>
+
+<div id="notice-bar" onclick="showModal()">
+    <strong style="font-size: 12px; color: var(--log-blue);">LogChat</strong>
+    <div style="font-size: 14px;">未読DM: あなたの指、見つけました。</div>
+</div>
+
+<div id="texture" class="finger-texture"></div>
+<div id="skin" class="skin-layer"></div>
+
+<div id="overlay">
+    <div class="modal">
+        <div class="modal-body" id="modal-text">本当に開きますか？</div>
+        <div class="modal-footer">
+            <button class="modal-btn" onclick="modalClick()">いいえ</button>
+            <button class="modal-btn btn-blue" onclick="modalClick()">はい</button>
         </div>
     </div>
 </div>
 
-<div id="horror-overlay">
-    <div id="modal">
-        <p id="horror-text">あ な た は</p>
-        <button onclick="nextHorror()">OK</button>
-    </div>
-</div>
+<div id="center-finger" onclick="touchFinger()">☝️</div>
 
-<div id="final-screen">
-    <div style="color: red; font-size: 1.5em; text-align: center;" id="typing-text"></div>
-    <div id="finger-img" style="font-size: 100px; margin-top: 20px; filter: grayscale(1) brightness(2);">☝️</div>
+<div id="final">
+    <div style="font-size: 100px; margin-bottom: 20px; filter: grayscale(1);">👐</div>
+    <h2 id="final-msg"></h2>
 </div>
 
 <script>
     let step = 0;
-    const messages = [
-        "あ な た は", 
-        "あ な た は 好き？", 
-        "あ な た は 白い指が好きですか？", 
-        "あ な た は 赤い通知が 好きですか？"
-    ];
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // ヌチャヌチャした音（擬似生成）
+    function playWetSound() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(100 + Math.random() * 200, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
 
-    // 起動トリガー
-    document.getElementById('trigger-msg').addEventListener('click', function() {
-        startInvasion();
-    });
-
-    function startInvasion() {
-        // UIの変質開始
-        document.getElementById('header').style.background = '#8b0000';
-        document.body.classList.add('white-finger-bg');
-        
-        // 偽の通知音（実際の音声ファイルを指定すれば鳴ります）
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    // 1. 導入：広告クリック
+    function startSequence() {
+        document.getElementById('ad-banner').style.display = 'none';
+        // 通知音（ピロン）の代わりにビープ
+        const osc = audioCtx.createOscillator();
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
 
         setTimeout(() => {
-            document.getElementById('horror-overlay').style.display = 'flex';
+            document.getElementById('notice-bar').style.top = '10px';
         }, 1000);
     }
 
-    function nextHorror() {
-        step++;
-        if (navigator.vibrate) navigator.vibrate(50);
+    // 2. 侵食：ダイアログ連打
+    const dialogs = [
+        "本当に開きますか？",
+        "指、足りていますか？",
+        "あ な た は",
+        "あ な た は し ろ い ゆ び が",
+        "あ な た は 白い指が 好きですか？"
+    ];
 
-        if (step < messages.length) {
-            document.getElementById('horror-text').innerText = messages[step];
-            // 画面を少しずつ赤く、狂わせていく
-            document.getElementById('horror-overlay').style.background = `rgba(${139 + step*20}, 0, 0, 0.9)`;
+    function showModal() {
+        document.getElementById('notice-bar').style.top = '-100px';
+        document.getElementById('overlay').style.display = 'flex';
+    }
+
+    function modalClick() {
+        step++;
+        if (step < dialogs.length) {
+            document.getElementById('modal-text').innerText = dialogs[step];
+            // 侵食を進める
+            document.getElementById('texture').style.opacity = step * 0.2;
+            document.getElementById('log-header').style.background = `rgb(${step * 40}, 86, 179)`;
         } else {
-            showFinal();
+            document.getElementById('overlay').style.display = 'none';
+            showFinger();
         }
     }
 
-    function showFinal() {
-        document.getElementById('horror-overlay').style.display = 'none';
-        const final = document.getElementById('final-screen');
+    function showFinger() {
+        const finger = document.getElementById('center-finger');
+        finger.style.transform = 'translate(-50%, -50%) scale(1)';
+        finger.classList.add('shaking');
+        document.getElementById('skin').style.opacity = '0.5';
+    }
+
+    // 3. 絶頂：触覚と視覚
+    function touchFinger() {
+        if (navigator.vibrate) {
+            navigator.vibrate([30, 10, 30, 10, 100]);
+        }
+        playWetSound();
+        
+        // 画面の皮膚化・粘土化
+        document.body.style.filter = "contrast(150%) brightness(80%) sepia(50%)";
+        document.getElementById('center-finger').style.transform = 'translate(-50%, -50%) scale(3)';
+        
+        setTimeout(goFinal, 1500);
+    }
+
+    // 4. フィニッシュ
+    function goFinal() {
+        const final = document.getElementById('final');
         final.style.display = 'flex';
-        
-        let text = "あなたの指、一本足りないよ。今、もらいに行くね。";
+        const msg = "あと一本、どこに隠したの？";
         let i = 0;
-        const target = document.getElementById('typing-text');
-        
         const timer = setInterval(() => {
-            if (i < text.length) {
-                target.innerHTML += text.charAt(i);
-                i++;
-                if (navigator.vibrate) navigator.vibrate(20);
-            } else {
+            document.getElementById('final-msg').innerHTML += msg.charAt(i);
+            i++;
+            if (i >= msg.length) {
                 clearInterval(timer);
-                // 最後に画面をフラッシュさせて終了
-                setTimeout(() => {
-                    final.style.background = "white";
-                    document.getElementById('finger-img').style.transform = "scale(5)";
-                    setTimeout(() => final.style.display = 'none', 100);
-                }, 2000);
+                setTimeout(() => location.reload(), 4000); // ループ
             }
         }, 150);
     }
 </script>
+
 </body>
 </html>
-
