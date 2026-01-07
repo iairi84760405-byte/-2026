@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<!
+
+    <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -7,46 +9,52 @@
     <style>
         :root { --logo-teal: #009cb8; --horror-red: #600000; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; font-family: "Helvetica Neue", Arial, sans-serif; background: #fff; overflow: hidden; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; font-family: "Helvetica Neue", Arial, sans-serif; background: #e6eef0; overflow: hidden; }
 
-        /* LoGoチャット再現 */
-        #app { display: flex; flex-direction: column; height: 100%; position: relative; transition: filter 1s; }
-        header { background: var(--logo-teal); color: white; padding: 15px; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+        /* LoGoチャット再現レイアウト */
+        #app { display: flex; flex-direction: column; height: 100%; position: relative; }
+        
+        /* ヘッダー */
+        header { background: var(--logo-teal); color: white; padding: 15px; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; z-index: 10; }
         header .back { position: absolute; left: 15px; font-size: 20px; }
         
-        #chat-log { flex: 1; background: #e6eef0; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        /* チャットエリア */
+        #chat-log { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; transition: background 2s; }
         
-        .date-line { text-align: center; margin: 10px 0; }
-        .date-line span { background: rgba(0,0,0,0.1); color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; }
+        .date-line { text-align: center; margin: 5px 0; }
+        .date-line span { background: rgba(0,0,0,0.1); color: #666; padding: 2px 10px; border-radius: 10px; font-size: 11px; }
 
-        .msg-row { display: flex; flex-direction: column; margin-bottom: 5px; }
+        .msg-row { display: flex; flex-direction: column; width: 100%; }
         .user-name { font-size: 11px; color: #555; margin-left: 5px; margin-bottom: 2px; }
-        .bubble { max-width: 80%; padding: 10px 12px; border-radius: 10px; font-size: 14px; line-height: 1.5; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .received { background: white; align-self: flex-start; }
+        
+        .bubble { max-width: 85%; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .received { background: white; align-self: flex-start; color: #333; }
         .sent { background: #56bccd; color: white; align-self: flex-end; }
         
-        /* スタンプ再現 */
-        .stamp-ok { width: 100px; height: auto; margin-left: 10px; transform: rotate(-5deg); filter: sepia(1) saturate(2); }
+        .stamp-mock { font-size: 40px; margin-left: 10px; margin-top: 5px; }
 
-        footer { border-top: 1px solid #ccc; padding: 10px; display: flex; align-items: center; gap: 10px; background: white; height: 60px; }
+        /* フッター */
+        footer { border-top: 1px solid #ccc; padding: 10px; display: flex; align-items: center; gap: 10px; background: white; height: 60px; flex-shrink: 0; }
         #input-mock { flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 8px; color: #999; font-size: 14px; background: #fafafa; }
-        .send-btn { color: var(--logo-teal); font-weight: bold; padding: 5px; cursor: pointer; }
+        .send-btn { color: var(--logo-teal); font-weight: bold; cursor: pointer; }
 
-        /* 赤い部屋ギミック */
-        #notice { position: fixed; top: -100px; left: 10px; right: 10px; background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1000; transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2); border-left: 8px solid var(--logo-teal); cursor: pointer; }
+        /* --- ホラー演出用要素 --- */
+        #notice { 
+            position: fixed; top: -120px; left: 10px; right: 10px; background: #fff; 
+            border-radius: 12px; padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); 
+            z-index: 1000; transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2); 
+            border-left: 8px solid var(--logo-teal); cursor: pointer; 
+        }
         
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
-        .modal { background: white; width: 85%; max-width: 300px; border-radius: 20px; text-align: center; overflow: hidden; border: 2px solid #333; }
+        .modal { background: white; width: 85%; max-width: 300px; border-radius: 20px; text-align: center; overflow: hidden; }
         .modal-text { padding: 40px 20px; font-size: 16px; font-weight: bold; color: #222; }
-        .modal-btn { width: 100%; padding: 18px; border: none; background: #f0f0f0; color: var(--logo-teal); font-weight: bold; border-top: 1px solid #ddd; font-size: 16px; }
+        .modal-btn { width: 100%; padding: 18px; border: none; background: #f0f0f0; color: var(--logo-teal); font-weight: bold; border-top: 1px solid #ddd; font-size: 16px; cursor: pointer; }
 
-        /* 白い指エフェクト */
         #horror-finger { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 180px; z-index: 1500; transition: 0.4s; filter: drop-shadow(0 0 20px #fff); pointer-events: none; }
-        .cracked { pointer-events: none; position: fixed; inset: 0; z-index: 500; opacity: 0; transition: 3s; background-image: url('https://www.transparenttextures.com/patterns/crackle.png'); filter: invert(0.8); }
-
-        /* 最終画面 */
-        #final { display: none; position: fixed; inset: 0; background: black; z-index: 3000; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; }
-        #final-text { font-size: 1.3em; font-family: "MS Mincho", serif; letter-spacing: 0.1em; color: #ccc; }
+        
+        #final { display: none; position: fixed; inset: 0; background: black; z-index: 3000; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; padding: 20px; }
+        #final-text { font-size: 1.3em; font-family: serif; letter-spacing: 0.1em; color: #ccc; line-height: 2; }
 
         @keyframes shake { 0% { transform: translate(-50.5%, -49.5%); } 50% { transform: translate(-49.5%, -50.5%); } }
         .shaking { animation: shake 0.1s infinite; }
@@ -59,45 +67,47 @@
         <span class="back">〈</span>
         教育委員会事務局 (4)
     </header>
+    
     <div id="chat-log">
         <div class="date-line"><span>1月13日(水)</span></div>
+        
         <div class="msg-row">
             <div class="user-name">石田順子</div>
             <div class="bubble received">明日の打ち合わせの資料ってどうなったっけ？</div>
         </div>
+        
         <div class="msg-row">
             <div class="user-name">高橋和明</div>
             <div class="bubble received">先方へPDFファイル送付済みです。定例連絡用のトークルームで。</div>
         </div>
-        <div class="msg-row" style="align-self: flex-end;">
+        
+        <div class="msg-row">
             <div class="bubble sent">ありがとうございます！</div>
         </div>
-        <div>
-             <img src="https://i.imgur.com/G5Y8uVn.png" alt="OK" class="stamp-ok" onerror="this.style.display='none';">
-             <div style="font-size: 40px; margin-left: 10px;">🆗</div>
-        </div>
+        
+        <div class="stamp-mock">🆗</div>
     </div>
-    <footer onclick="initInfection()">
+
+    <footer onclick="startEvent()">
         <span style="font-size: 24px; color: var(--logo-teal);">＋</span>
         <div id="input-mock">メッセージを入力</div>
         <div class="send-btn">送信</div>
     </footer>
 </div>
 
-<div id="notice" onclick="triggerModal()">
+<div id="notice" onclick="openModal()">
     <b style="color: var(--logo-teal);">LoGoチャット</b><br>
     未読DM: あなたの指、見つけました。
 </div>
 
-<div class="cracked" id="crack-overlay"></div>
-<div id="horror-finger">☝️</div>
-
 <div id="overlay">
     <div class="modal">
         <div id="modal-content" class="modal-text">本当に開きますか？</div>
-        <button class="modal-btn" onclick="handleModal()">はい</button>
+        <button class="modal-btn" onclick="handleStep()">はい</button>
     </div>
 </div>
+
+<div id="horror-finger">☝️</div>
 
 <div id="final">
     <div id="final-text"></div>
@@ -113,44 +123,41 @@
         "あ な た は 白い指が 好きですか？"
     ];
 
-    function initInfection() {
-        // 最初のクリックで通知を出す
+    function startEvent() {
+        // 初回クリックで通知を表示
         if (navigator.vibrate) navigator.vibrate([100, 30, 100]);
         document.getElementById('notice').style.top = '10px';
     }
 
-    function triggerModal() {
+    function openModal() {
         document.getElementById('notice').style.top = '-150px';
         document.getElementById('overlay').style.display = 'flex';
     }
 
-    function handleModal() {
+    function handleStep() {
         step++;
         if (step < scripts.length) {
             document.getElementById('modal-content').innerText = scripts[step];
-            // じわじわ背景を赤く、テクスチャを濃くする
-            document.getElementById('chat-log').style.background = `rgb(${step * 35}, 30, 30)`;
-            document.getElementById('crack-overlay').style.opacity = step * 0.2;
+            document.getElementById('chat-log').style.background = `rgb(${step * 40}, 30, 30)`;
         } else {
             document.getElementById('overlay').style.display = 'none';
-            showFinger();
+            triggerFinger();
         }
     }
 
-    function showFinger() {
+    function triggerFinger() {
         const f = document.getElementById('horror-finger');
         f.style.transform = 'translate(-50%, -50%) scale(1)';
         f.classList.add('shaking');
         
-        // 指が出てから数秒後に強制的にフィニッシュへ
         setTimeout(() => {
             if (navigator.vibrate) navigator.vibrate(800);
-            document.getElementById('app').style.filter = "invert(1) contrast(2)";
-            setTimeout(goFinal, 500);
+            document.getElementById('app').style.filter = "invert(1) contrast(2) grayscale(1)";
+            setTimeout(showFinal, 500);
         }, 2000);
     }
 
-    function goFinal() {
+    function showFinal() {
         document.getElementById('final').style.display = 'flex';
         const msg = "あと一本、どこに隠したの？";
         let i = 0;
@@ -161,7 +168,7 @@
             i++;
             if (i >= msg.length) {
                 clearInterval(typer);
-                // 5秒後にリロード（ループ演出）
+                // 5秒後に自動リロード（ループ演出）
                 setTimeout(() => location.reload(), 5000);
             }
         }, 200);
