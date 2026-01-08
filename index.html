@@ -2,62 +2,187 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>多々良の白指</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGO Chat - 多々良沼保全課</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700&display=swap');
+        :root {
+            --logo-blue: #2c3e50;
+            --bg-gray: #f0f2f5;
+            --bubble-white: #ffffff;
+            --bubble-blue: #007bff;
+        }
+
         body {
-            background-color: #020402;
-            color: #c5cfc5;
-            font-family: 'Shippori Mincho B1', serif;
+            margin: 0;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-gray);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ヘッダー */
+        header {
+            background-color: var(--logo-blue);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* チャットエリア */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .message.sato {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.suzuki {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .user-name {
+            font-size: 12px;
+            color: #65676b;
+            margin-bottom: 5px;
+        }
+
+        .bubble {
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .sato .bubble {
+            background-color: var(--bubble-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .suzuki .bubble {
+            background-color: var(--bubble-white);
+            color: black;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* 画像サムネイル */
+        .photo-thumbnail {
+            margin-top: 10px;
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border: 1px solid #ddd;
+        }
+
+        .photo-thumbnail:hover {
+            opacity: 0.9;
+        }
+
+        /* モーダル（拡大表示） */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            width: 50px;
+            height: 50px;
             display: flex;
             justify-content: center;
-            margin: 0;
-            overflow-x: hidden;
-            line-height: 2.2;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
         }
-        #novel-container {
-            width: 85%;
-            max-width: 750px;
-            padding: 12vh 20px;
+
+        #close-btn:hover {
+            background: rgba(255,255,255,0.2);
         }
-        .segment {
-            margin-bottom: 6rem;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 2.5s ease-out;
-        }
-        .segment.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .white-fingers { color: #ffffff; text-shadow: 0 0 12px #fff; }
-        .red-alert { color: #900; font-weight: bold; }
-        .shrine-gold { color: #b09e6d; }
+
     </style>
 </head>
 <body>
 
-<div id="novel-container">
-    <div class="segment">かつて多々良沼は、命を「間引く」場所だった。</div>
-    <div class="segment">幹部たちが選別した老人たちは、生きたまま泥の底へ沈められた。</div>
-    <div class="segment">それからだ。選んだ側の幹部たちにだけ、<span class="white-fingers">「紙粘土の白い指」</span>が見え始めたのは。</div>
-    <div class="segment">「呼ばれている」――高熱に浮かされた彼らは、吸い込まれるように入水した。</div>
-    <div class="segment">村人は沼の底を塞ぐために<span class="shrine-gold">「浮島辨財天」という名の栓</span>を打ち込み、<br>漏れ出す呪いを防ぐために小径へ<span class="white-fingers">道祖神</span>を並べた。それが今の「彫刻」だ。</div>
-    <div class="segment">保全課の俺が点検写真に見たのは、本物の、真っ白にふやけた人間の指だった。</div>
-    <div class="segment">写真は、見るたびに増えていく。指が、俺の方へ近づいてくる。</div>
-    <div class="segment">不意の熱。自分の指が紙粘土のように白く変色し、関節を失い、沼を指して折れ曲がった。</div>
-    <div class="segment">俺の身体が、沼を埋めるための<span class="white-fingers">「白い土」</span>に変わっていく。</div>
-    <div class="segment"><span class="red-alert">『栓が緩めば、その血筋の者が穴を塞ぐ新しい芯とならねばならない』</span></div>
-    <div class="segment">俺は、保全のために雇われたのではない。</div>
-    <div class="segment">俺自身が、多々良沼に捧げられる、最後の一片だったのだ。</div>
+<header>LOGO Chat - 多々良沼保全課</header>
+
+<div id="chat-window">
+    <div class="message sato">
+        <span class="user-name">佐藤</span>
+        <div class="bubble">鈴木さん、お疲れ様です。彫刻の小径の定期巡回、今日の分の写真を上げてもらえますか？特に辨財天付近の彫像の状態を確認したいです。</div>
+    </div>
+
+    <div class="message suzuki">
+        <span class="user-name">鈴木</span>
+        <div class="bubble">お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでしたが、一部の彫像の足元に白いゴミのようなものが散乱していました。</div>
+        <img src="https://picsum.photos/seed/tatara/800/600" alt="巡回写真" class="photo-thumbnail" onclick="openModal(this.src)">
+    </div>
+</div>
+
+<div id="modal" onclick="closeModal()">
+    <span id="close-btn">&times;</span>
+    <img id="modal-img" src="" alt="拡大写真">
 </div>
 
 <script>
-    const segments = document.querySelectorAll('.segment');
-    let delay = 0;
-    segments.forEach((seg) => {
-        setTimeout(() => { seg.classList.add('active'); }, delay);
-        delay += 4000;
+    function openModal(src) {
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('modal-img').src = src;
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    // Escキーでも閉じられるように設定
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
     });
 </script>
 
