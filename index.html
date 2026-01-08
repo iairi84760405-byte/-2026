@@ -9,7 +9,8 @@
             --logo-blue: #2c3e50;
             --bg-gray: #f0f2f5;
             --bubble-white: #ffffff;
-            --bubble-blue: #007bff;
+            /* 指定のメインカラーに変更 */
+            --bubble-main: #5EC2CF; 
         }
 
         body {
@@ -45,6 +46,16 @@
             display: flex;
             flex-direction: column;
             max-width: 80%;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message.sato {
@@ -72,8 +83,9 @@
             word-wrap: break-word;
         }
 
+        /* 佐藤側の色を変更 */
         .sato .bubble {
-            background-color: var(--bubble-blue);
+            background-color: var(--bubble-main);
             color: white;
             border-bottom-right-radius: 4px;
         }
@@ -101,7 +113,7 @@
             opacity: 0.9;
         }
 
-        /* モーダル（拡大表示） */
+        /* モーダル */
         #modal {
             display: none;
             position: fixed;
@@ -119,7 +131,6 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         #close-btn {
@@ -128,22 +139,8 @@
             right: 20px;
             color: white;
             font-size: 40px;
-            font-weight: bold;
             cursor: pointer;
-            user-select: none;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
         }
-
-        #close-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
     </style>
 </head>
 <body>
@@ -151,17 +148,7 @@
 <header>LOGO Chat - 多々良沼保全課</header>
 
 <div id="chat-window">
-    <div class="message sato">
-        <span class="user-name">佐藤</span>
-        <div class="bubble">鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？</div>
     </div>
-
-    <div class="message suzuki">
-        <span class="user-name">鈴木</span>
-        <div class="bubble">お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでした。</div>
-        <img src="https://picsum.photos/seed/tatara/800/600" alt="巡回写真" class="photo-thumbnail" onclick="openModal(this.src)">
-    </div>
-</div>
 
 <div id="modal" onclick="closeModal()">
     <span id="close-btn">&times;</span>
@@ -169,6 +156,52 @@
 </div>
 
 <script>
+    const chatWindow = document.getElementById('chat-window');
+    
+    // チャットデータ
+    const chatData = [
+        { type: 'sato', name: '佐藤', text: '鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？' },
+        { type: 'suzuki', name: '鈴木', text: 'お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでした。', img: 'https://picsum.photos/seed/tatara/800/600' },
+        { type: 'sato', name: '佐藤', text: '何か白い物が写っていませんか？' },
+        { type: 'suzuki', name: '鈴木', text: '写っていませんよ？' }
+    ];
+
+    let index = 0;
+
+    function addMessage() {
+        if (index >= chatData.length) return;
+
+        const data = chatData[index];
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${data.type}`;
+
+        let content = `
+            <span class="user-name">${data.name}</span>
+            <div class="bubble">${data.text}</div>
+        `;
+
+        if (data.img) {
+            content += `<img src="${data.img}" alt="巡回写真" class="photo-thumbnail" onclick="openModal('${data.img}')">`;
+        }
+
+        messageDiv.innerHTML = content;
+        chatWindow.appendChild(messageDiv);
+
+        // 下までスクロール
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        index++;
+
+        // 次のメッセージを2秒後に表示
+        if (index < chatData.length) {
+            setTimeout(addMessage, 2000);
+        }
+    }
+
+    // 最初のメッセージを開始
+    setTimeout(addMessage, 1000);
+
+    // モーダル処理
     function openModal(src) {
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('modal-img').src = src;
@@ -178,11 +211,8 @@
         document.getElementById('modal').style.display = 'none';
     }
 
-    // Escキーでも閉じられるように設定
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeModal();
-        }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") closeModal();
     });
 </script>
 
