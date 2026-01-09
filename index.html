@@ -6,11 +6,9 @@
     <title>LOGO Chat - 多々良沼保全課</title>
     <style>
         :root {
-            /* ヘッダー色: darkturquoise */
             --header-bg: #00ced1;
             --bg-gray: #f0f2f5;
             --bubble-white: #ffffff;
-            /* チャット背景色: paleturquoise */
             --bubble-main: #afeeee; 
         }
 
@@ -24,7 +22,6 @@
             overflow: hidden;
         }
 
-        /* ヘッダー */
         header {
             background-color: var(--header-bg);
             color: white;
@@ -35,7 +32,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
-        /* チャットエリア */
         #chat-window {
             flex: 1;
             overflow-y: auto;
@@ -55,27 +51,13 @@
         }
 
         @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.sato {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
+        .message.sato { align-self: flex-end; align-items: flex-end; }
+        .message.suzuki { align-self: flex-start; align-items: flex-start; }
 
-        .message.suzuki {
-            align-self: flex-start;
-            align-items: flex-start;
-        }
-
-        .user-name {
-            font-size: 12px;
-            color: #65676b;
-            margin-bottom: 5px;
-        }
+        .user-name { font-size: 12px; color: #65676b; margin-bottom: 5px; }
 
         .bubble {
             padding: 10px 15px;
@@ -107,73 +89,58 @@
             object-fit: cover;
             border-radius: 8px;
             cursor: pointer;
-            transition: opacity 0.2s;
             border: 1px solid #ddd;
         }
 
-        /* 暗転演出用のオーバーレイ */
-        #black-out {
+        /* 演出用スクリーン（黒・白共通） */
+        #overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: black;
             z-index: 2000;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             box-sizing: border-box;
-            transition: opacity 2s ease-in;
-            opacity: 0;
+            transition: background-color 1s ease, opacity 1s ease;
         }
 
-        .horror-text {
-            color: #b30000; /* 深い赤 */
+        .display-text {
             font-size: 18px;
             margin: 10px 0;
-            text-shadow: 0 0 8px rgba(179, 0, 0, 0.6);
-            opacity: 0;
-            animation: textFadeIn 1s forwards;
             text-align: center;
             max-width: 600px;
-            line-height: 1.6;
+            line-height: 1.8;
+            animation: textFadeIn 0.8s forwards;
         }
 
-        @keyframes textFadeIn {
-            to { opacity: 1; }
+        @keyframes textFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 朝ごはん画像 */
+        #morning-img {
+            margin-top: 20px;
+            max-width: 80%;
+            max-height: 40%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
         }
 
         /* モーダル */
         #modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            z-index: 3000;
+            justify-content: center; align-items: center;
         }
-
-        #modal-img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
-
-        #close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-        }
+        #modal-img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        #close-btn { position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -187,12 +154,13 @@
     <img id="modal-img" src="" alt="拡大写真">
 </div>
 
-<div id="black-out"></div>
+<div id="overlay"></div>
 
 <script>
     const chatWindow = document.getElementById('chat-window');
-    const blackOut = document.getElementById('black-out');
+    const overlay = document.getElementById('overlay');
     
+    // 1. チャットデータ
     const chatData = [
         { type: 'sato', name: '佐藤', text: '鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？' },
         { type: 'suzuki', name: '鈴木', text: 'お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでした。', img: 'https://picsum.photos/seed/tatara/800/600' },
@@ -200,9 +168,11 @@
         { type: 'suzuki', name: '鈴木', text: '写っていませんよ？' }
     ];
 
+    // 2. 悪夢パート（黒背景・赤文字）
     const horrorLines = [
         "暗く、粘ついた空間に俺は立っていた。",
-        "足元は地面なのか、それとも底なしの泥なのか分からない。ただ一歩動くたび、ぬちり、と嫌な音が腹の奥まで響く。",
+        "足元は地面なのか、それとも底なしの泥なのか分からない。",
+        "ただ一歩動くたび、ぬちり、と嫌な音が腹の奥まで響く。",
         "光はない。",
         "あるのは、闇が呼吸しているかのような圧迫感だけだった。",
         "――ざり……ざり……",
@@ -231,74 +201,84 @@
         "闇が、近づいてくる。"
     ];
 
+    // 3. 現実パート（白背景・黒文字）
+    const morningLines = [
+        "目覚まし時計の音が聞こえる",
+        "起きなくては",
+        "今日は邑楽側の見回りと、業者との打ち合わせがある",
+        "ふと携帯を見るとロゴチャットが来ていた",
+        "普段このようなことはなく、少し胸騒ぎがした"
+    ];
+
     let index = 0;
     const messageDelay = 3500;
 
     function addMessage() {
         if (index >= chatData.length) {
-            // チャット終了後、3.5秒待ってから暗転開始
             setTimeout(startHorrorPhase, messageDelay);
             return;
         }
-
         const data = chatData[index];
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${data.type}`;
-
         let content = `<span class="user-name">${data.name}</span><div class="bubble">${data.text}</div>`;
-        if (data.img) {
-            content += `<img src="${data.img}" alt="巡回写真" class="photo-thumbnail" onclick="openModal('${data.img}')">`;
-        }
-
+        if (data.img) content += `<img src="${data.img}" class="photo-thumbnail" onclick="openModal('${data.img}')">`;
         messageDiv.innerHTML = content;
         chatWindow.appendChild(messageDiv);
         chatWindow.scrollTop = chatWindow.scrollHeight;
-
         index++;
         setTimeout(addMessage, messageDelay);
     }
 
+    // 悪夢開始
     function startHorrorPhase() {
-        blackOut.style.display = 'flex';
-        // フェードイン
-        setTimeout(() => { blackOut.style.opacity = '1'; }, 100);
-        
-        // 暗転完了（約2秒後）にテキスト表示開始
-        setTimeout(showHorrorText, 2500);
+        overlay.style.display = 'flex';
+        overlay.style.backgroundColor = 'black';
+        setTimeout(() => { overlay.style.opacity = '1'; }, 100);
+        setTimeout(() => showText(horrorLines, "#b30000", true, 0), 2000);
     }
 
-    let horrorIndex = 0;
-    function showHorrorText() {
-        if (horrorIndex >= horrorLines.length) return;
+    // 現実開始
+    function startMorningPhase() {
+        overlay.innerHTML = "";
+        overlay.style.backgroundColor = 'white';
+        setTimeout(() => showText(morningLines, "black", false, 0), 1000);
+    }
 
+    function showText(lines, color, isHorror, lineIdx) {
+        if (lineIdx >= lines.length) {
+            if (isHorror) {
+                setTimeout(startMorningPhase, 2000);
+            } else {
+                // 朝ごはん画像表示
+                const img = document.createElement('img');
+                img.id = "morning-img";
+                img.src = "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=800&q=80"; // 朝食イメージ
+                img.style.display = "block";
+                overlay.appendChild(img);
+            }
+            return;
+        }
+
+        overlay.innerHTML = "";
         const p = document.createElement('p');
-        p.className = 'horror-text';
-        p.textContent = horrorLines[horrorIndex];
-        
-        // 常に最新の1行を見やすくするため、前の行を少し薄くするか消す場合はここを調整
-        // 今回は次々流れるようにします
-        blackOut.innerHTML = ""; // 1行ずつ表示するためにクリア
-        blackOut.appendChild(p);
+        p.className = 'display-text';
+        p.style.color = color;
+        if (isHorror) p.style.textShadow = "0 0 8px rgba(179,0,0,0.6)";
+        p.textContent = lines[lineIdx];
+        overlay.appendChild(p);
 
-        horrorIndex++;
-        setTimeout(showHorrorText, 3000);
+        setTimeout(() => showText(lines, color, isHorror, lineIdx + 1), 3000);
     }
 
-    // 初回起動
     setTimeout(addMessage, 1000);
 
     function openModal(src) {
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('modal-img').src = src;
     }
-
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") closeModal();
-    });
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
 </script>
 
 </body>
