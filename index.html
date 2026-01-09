@@ -6,11 +6,12 @@
     <title>LOGO Chat - 多々良沼保全課</title>
     <style>
         :root {
-            --logo-blue: #2c3e50;
+            /* ヘッダー色: darkturquoise */
+            --header-bg: #00ced1;
             --bg-gray: #f0f2f5;
             --bubble-white: #ffffff;
-            /* 指定のメインカラーに変更 */
-            --bubble-main: #5EC2CF; 
+            /* チャット背景色: paleturquoise */
+            --bubble-main: #afeeee; 
         }
 
         body {
@@ -24,12 +25,13 @@
 
         /* ヘッダー */
         header {
-            background-color: var(--logo-blue);
+            background-color: var(--header-bg);
             color: white;
             padding: 15px;
             text-align: center;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         /* チャットエリア */
@@ -48,7 +50,7 @@
             max-width: 80%;
             opacity: 0;
             transform: translateY(10px);
-            animation: fadeIn 0.3s forwards;
+            animation: fadeIn 0.5s forwards;
         }
 
         @keyframes fadeIn {
@@ -83,13 +85,15 @@
             word-wrap: break-word;
         }
 
-        /* 佐藤側の色を変更 */
+        /* 佐藤側の色（背景: paleturquoise / 文字: 黒） */
         .sato .bubble {
             background-color: var(--bubble-main);
-            color: white;
+            color: #000; /* 黒字 */
             border-bottom-right-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
+        /* 鈴木側の色 */
         .suzuki .bubble {
             background-color: var(--bubble-white);
             color: black;
@@ -158,7 +162,6 @@
 <script>
     const chatWindow = document.getElementById('chat-window');
     
-    // チャットデータ
     const chatData = [
         { type: 'sato', name: '佐藤', text: '鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？' },
         { type: 'suzuki', name: '鈴木', text: 'お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでした。', img: 'https://picsum.photos/seed/tatara/800/600' },
@@ -167,6 +170,8 @@
     ];
 
     let index = 0;
+    // 表示間隔を3.5秒（3500ms）に延長
+    const messageDelay = 3500;
 
     function addMessage() {
         if (index >= chatData.length) return;
@@ -187,21 +192,18 @@
         messageDiv.innerHTML = content;
         chatWindow.appendChild(messageDiv);
 
-        // 下までスクロール
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         index++;
 
-        // 次のメッセージを2秒後に表示
         if (index < chatData.length) {
-            setTimeout(addMessage, 2000);
+            setTimeout(addMessage, messageDelay);
         }
     }
 
-    // 最初のメッセージを開始
+    // 最初のメッセージ開始
     setTimeout(addMessage, 1000);
 
-    // モーダル処理
     function openModal(src) {
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('modal-img').src = src;
