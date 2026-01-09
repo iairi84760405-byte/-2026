@@ -21,6 +21,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         /* ヘッダー */
@@ -85,15 +86,13 @@
             word-wrap: break-word;
         }
 
-        /* 佐藤側の色（背景: paleturquoise / 文字: 黒） */
         .sato .bubble {
             background-color: var(--bubble-main);
-            color: #000; /* 黒字 */
+            color: #000;
             border-bottom-right-radius: 4px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        /* 鈴木側の色 */
         .suzuki .bubble {
             background-color: var(--bubble-white);
             color: black;
@@ -101,7 +100,6 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* 画像サムネイル */
         .photo-thumbnail {
             margin-top: 10px;
             width: 200px;
@@ -113,8 +111,39 @@
             border: 1px solid #ddd;
         }
 
-        .photo-thumbnail:hover {
-            opacity: 0.9;
+        /* 暗転演出用のオーバーレイ */
+        #black-out {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 2s ease-in;
+            opacity: 0;
+        }
+
+        .horror-text {
+            color: #b30000; /* 深い赤 */
+            font-size: 18px;
+            margin: 10px 0;
+            text-shadow: 0 0 8px rgba(179, 0, 0, 0.6);
+            opacity: 0;
+            animation: textFadeIn 1s forwards;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        @keyframes textFadeIn {
+            to { opacity: 1; }
         }
 
         /* モーダル */
@@ -151,16 +180,18 @@
 
 <header>LOGO Chat - 多々良沼保全課</header>
 
-<div id="chat-window">
-    </div>
+<div id="chat-window"></div>
 
 <div id="modal" onclick="closeModal()">
     <span id="close-btn">&times;</span>
     <img id="modal-img" src="" alt="拡大写真">
 </div>
 
+<div id="black-out"></div>
+
 <script>
     const chatWindow = document.getElementById('chat-window');
+    const blackOut = document.getElementById('black-out');
     
     const chatData = [
         { type: 'sato', name: '佐藤', text: '鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？' },
@@ -169,39 +200,91 @@
         { type: 'suzuki', name: '鈴木', text: '写っていませんよ？' }
     ];
 
+    const horrorLines = [
+        "暗く、粘ついた空間に俺は立っていた。",
+        "足元は地面なのか、それとも底なしの泥なのか分からない。ただ一歩動くたび、ぬちり、と嫌な音が腹の奥まで響く。",
+        "光はない。",
+        "あるのは、闇が呼吸しているかのような圧迫感だけだった。",
+        "――ざり……ざり……",
+        "どこからか、擦れる音がする。",
+        "闇の奥が、わずかに蠢いた。",
+        "次の瞬間、白いものが浮かび上がった。",
+        "手だ。",
+        "骨ばった、異様に白い手。",
+        "一本ではない。二本でもない。",
+        "闇の壁そのものが裂けるように、無数の手が生え、伸びてくる。",
+        "指が、ゆっくりと、しかし確実にこちらへ向かってくる。",
+        "爪は黒く濁り、皮膚は水死体のようにふやけていた。",
+        "逃げようとした。",
+        "だが、足が動かない。",
+        "最初の一本が、俺の手首に触れた。",
+        "冷たい。",
+        "氷のようなのに、内部から脈打つ感触がある。",
+        "「――――」",
+        "声にならない声が、直接頭の中に流れ込んできた。",
+        "意味は分からない。",
+        "ただ、“引きずり込む”という意志だけが、はっきりと伝わる。",
+        "次の手が、指を絡めてきた。",
+        "さらに別の手が、爪を食い込ませる。",
+        "皮膚の内側を、何かが這い回る感覚。",
+        "気づけば、俺の腕は白い手の塊に包まれていた。",
+        "闇が、近づいてくる。"
+    ];
+
     let index = 0;
-    // 表示間隔を3.5秒（3500ms）に延長
     const messageDelay = 3500;
 
     function addMessage() {
-        if (index >= chatData.length) return;
+        if (index >= chatData.length) {
+            // チャット終了後、3.5秒待ってから暗転開始
+            setTimeout(startHorrorPhase, messageDelay);
+            return;
+        }
 
         const data = chatData[index];
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${data.type}`;
 
-        let content = `
-            <span class="user-name">${data.name}</span>
-            <div class="bubble">${data.text}</div>
-        `;
-
+        let content = `<span class="user-name">${data.name}</span><div class="bubble">${data.text}</div>`;
         if (data.img) {
             content += `<img src="${data.img}" alt="巡回写真" class="photo-thumbnail" onclick="openModal('${data.img}')">`;
         }
 
         messageDiv.innerHTML = content;
         chatWindow.appendChild(messageDiv);
-
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         index++;
-
-        if (index < chatData.length) {
-            setTimeout(addMessage, messageDelay);
-        }
+        setTimeout(addMessage, messageDelay);
     }
 
-    // 最初のメッセージ開始
+    function startHorrorPhase() {
+        blackOut.style.display = 'flex';
+        // フェードイン
+        setTimeout(() => { blackOut.style.opacity = '1'; }, 100);
+        
+        // 暗転完了（約2秒後）にテキスト表示開始
+        setTimeout(showHorrorText, 2500);
+    }
+
+    let horrorIndex = 0;
+    function showHorrorText() {
+        if (horrorIndex >= horrorLines.length) return;
+
+        const p = document.createElement('p');
+        p.className = 'horror-text';
+        p.textContent = horrorLines[horrorIndex];
+        
+        // 常に最新の1行を見やすくするため、前の行を少し薄くするか消す場合はここを調整
+        // 今回は次々流れるようにします
+        blackOut.innerHTML = ""; // 1行ずつ表示するためにクリア
+        blackOut.appendChild(p);
+
+        horrorIndex++;
+        setTimeout(showHorrorText, 3000);
+    }
+
+    // 初回起動
     setTimeout(addMessage, 1000);
 
     function openModal(src) {
