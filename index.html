@@ -162,10 +162,13 @@
     
     // 1. チャットデータ
     const chatData = [
-        { type: 'sato', name: '佐藤', text: '鈴木さん、お疲れ様です。彫刻の径の定期巡回、今日の分の写真を上げてもらえますか？' },
-        { type: 'suzuki', name: '鈴木', text: 'お疲れ様です。了解しました。今日の巡回写真です。特に異常はありませんでした。', img: 'https://picsum.photos/seed/tatara/800/600' },
-        { type: 'sato', name: '佐藤', text: '何か白い物が写っていませんか？' },
-        { type: 'suzuki', name: '鈴木', text: '写っていませんよ？' }
+        { type: "sato", name: "佐藤", text: "今日の巡回写真です。特に異常はありませんでした", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80" },
+        { type: "suzuki", name: "鈴木", text: "あー始まったか" },
+        { type: "sato", name: "佐藤", text: "何がですか？" },
+        { type: "suzuki", name: "鈴木", text: "あれだよ、危険存在対策" },
+        { type: "sato", name: "佐藤", text: "あの50年に一度のあれですか？周期的にはあと20年は大丈夫のはずなのに、、、" },
+        { type: "suzuki", name: "鈴木", text: "よく写真を見てみて、薄っすら手が映ってるだろ" },
+        { type: "sato", name: "佐藤", text: "確かに映ってる、、" }
     ];
 
     // 2. 悪夢パート（黒背景・赤文字）
@@ -201,13 +204,12 @@
         "闇が、近づいてくる。"
     ];
 
-    // 3. 現実パート（白背景・黒文字）
+    // 3. 現実パート（更新済み）
     const morningLines = [
         "目覚まし時計の音が聞こえる",
         "起きなくては",
-        "今日は邑楽側の見回りと、業者との打ち合わせがある",
-        "ふと携帯を見るとロゴチャットが来ていた",
-        "普段このようなことはなく、少し胸騒ぎがした"
+        "今日からはアレの対策が始まる",
+        "今回も問題なく完了できるだろうか？"
     ];
 
     let index = 0;
@@ -230,7 +232,6 @@
         setTimeout(addMessage, messageDelay);
     }
 
-    // 悪夢開始
     function startHorrorPhase() {
         overlay.style.display = 'flex';
         overlay.style.backgroundColor = 'black';
@@ -238,7 +239,6 @@
         setTimeout(() => showText(horrorLines, "#b30000", true, 0), 2000);
     }
 
-    // 現実開始
     function startMorningPhase() {
         overlay.innerHTML = "";
         overlay.style.backgroundColor = 'white';
@@ -250,10 +250,9 @@
             if (isHorror) {
                 setTimeout(startMorningPhase, 2000);
             } else {
-                // 朝ごはん画像表示
                 const img = document.createElement('img');
                 img.id = "morning-img";
-                img.src = "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=800&q=80"; // 朝食イメージ
+                img.src = "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=800&q=80";
                 img.style.display = "block";
                 overlay.appendChild(img);
             }
